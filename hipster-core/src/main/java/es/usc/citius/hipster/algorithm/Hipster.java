@@ -23,6 +23,7 @@ import es.usc.citius.hipster.model.HeuristicNode;
 import es.usc.citius.hipster.model.Node;
 import es.usc.citius.hipster.model.function.impl.ADStarNodeExpander;
 import es.usc.citius.hipster.model.function.impl.ADStarNodeFactory;
+import es.usc.citius.hipster.model.function.impl.BinaryOperation;
 import es.usc.citius.hipster.model.impl.ADStarNodeImpl;
 import es.usc.citius.hipster.model.problem.SearchComponents;
 import es.usc.citius.hipster.model.problem.SearchProblem;
@@ -179,4 +180,15 @@ public final class Hipster {
                 Collections.singleton(components.getGoal()),
                 expander);
     }
+    
+	public static <A, S, C extends Comparable<C>, N extends HeuristicNode<A, S, C, N>> BSStar<A, S, C, N> createBSStar(SearchProblem<A, S, N> components) {
+        
+		return new BSStar(
+				components.getInitialNode(),
+				components.getGoalNode(),
+				components.getExpander(),
+				components.getExpander(),
+				BinaryOperation.doubleAdditionOp()
+		);
+	}
 }

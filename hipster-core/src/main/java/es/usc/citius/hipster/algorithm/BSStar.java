@@ -48,33 +48,37 @@ public class BSStar<A, S, C extends Comparable<C>, N extends HeuristicNode<A, S,
 			d = (open[0].size() < open[1].size()) ? 0 : 1;
 			// Extract next lowest f node
 			N current = open[d].poll();
-			closed[d].put(current.state(), current);
-			// If the cost of the current is greater than the best path so far,
-			// skip
-			if (current.getScore().compareTo(bestCost) >= 0)
-				return computeNext();
-			// if the current state has been reached by the other direction, a
-			// solution has been found
-			if (closed[1 - d].containsKey(current.state())) {
-				// Update the best cost (minimum between the best so far and the
-				// sum of the forward + backward paths
-				N opposite = closed[1 - d].get(current.state());
-				// Compute the cost of the path
-				C pathCost = binaryOperation.apply(current.getCost(), opposite.getCost());
-				// Update threshold
-				bestCost = pathCost.compareTo(bestCost) < 0 ? pathCost : bestCost;
-				// Pruning step: remove descendants of current node that appear
-				// in open[1-d] to avoid
-				// recomputing again the same nodes
-				return computeNext(); // continue
+			if (current != null) {
+				//System.out.println(current);
+				//System.out.println("Index d: " + d);
+				closed[d].put(current.state(), current);
+				// If the cost of the current is greater than the best path so far,
+				// skip
+				if (current.getScore().compareTo(bestCost) >= 0)
+					return computeNext();
+				// if the current state has been reached by the other direction, a
+				// solution has been found
+				if (closed[1 - d].containsKey(current.state())) {
+					// Update the best cost (minimum between the best so far and the
+					// sum of the forward + backward paths
+					N opposite = closed[1 - d].get(current.state());
+					// Compute the cost of the path
+					C pathCost = binaryOperation.apply(current.getCost(), opposite.getCost());
+					// Update threshold
+					bestCost = pathCost.compareTo(bestCost) < 0 ? pathCost : bestCost;
+					//System.out.println(bestCost);
+					// Pruning step: remove descendants of current node that appear
+					// in open[1-d] to avoid
+					// recomputing again the same nodes
+					return computeNext(); // continue
+				}
+				for (N succ : expander[d].expand(current)) {
+					if (succ.getScore().compareTo(bestCost) >= 0)
+						continue; // no improvement!
+					// Add a new valid successor
+					open[d].add(succ);
+				}
 			}
-			for (N succ : expander[d].expand(current)) {
-				if (succ.getScore().compareTo(bestCost) >= 0)
-					continue; // no improvement!
-				// Add a new valid successor
-				open[d].add(succ);
-			}
-
 			return current;
 		}
 	}

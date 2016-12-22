@@ -12,15 +12,27 @@ import es.usc.citius.hipster.model.function.NodeExpander;
  */
 public class SearchProblem<A,S,N extends Node<A,S,N>> {
     private N initialNode;
+    private N goalNode;
     private NodeExpander<A,S,N> expander;
 
     public SearchProblem(N initialNode, NodeExpander<A, S, N> expander) {
         this.initialNode = initialNode;
+        this.goalNode = null;
         this.expander = expander;
+    }
+    
+    public SearchProblem(N initialNode, N goalNode, NodeExpander<A, S, N> expander) {
+    	this.initialNode = initialNode;
+    	this.goalNode = goalNode;
+    	this.expander = expander;
     }
 
     public N getInitialNode() {
         return initialNode;
+    }
+    
+    public N getGoalNode() {
+    	return goalNode;
     }
 
     public NodeExpander<A, S, N> getExpander() {

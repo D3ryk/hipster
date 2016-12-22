@@ -183,6 +183,16 @@ public final class GraphSearchProblem {
                             .useGenericCostFunction(cf, costAlgebra)
                             .build();
                 }
+                
+                public SearchProblem<E, V, WeightedNode<E, V, C>> buildBidirectional() {
+                    return ProblemBuilder.create()
+                            .initialState(fromVertex)
+                            .goalState(toVertex)
+                            .defineProblemWithExplicitActions()
+                            .useTransitionFunction(tf)
+                            .useGenericCostFunction(cf, costAlgebra)
+                            .buildBidirectional();
+                }
 
                 public class Final {
                     private HeuristicFunction<V, C> hf;

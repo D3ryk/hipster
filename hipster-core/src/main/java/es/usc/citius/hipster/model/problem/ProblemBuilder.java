@@ -22,6 +22,7 @@ import es.usc.citius.hipster.model.function.*;
 import es.usc.citius.hipster.model.function.impl.*;
 import es.usc.citius.hipster.model.impl.UnweightedNode;
 import es.usc.citius.hipster.model.impl.WeightedNode;
+import es.usc.citius.hipster.model.problem.ProblemBuilder.Wizard.ActionState.WithAction.Action;
 
 /**
  * Problem builder that is used to guide the user through the creation of a
@@ -45,9 +46,16 @@ public final class ProblemBuilder {
          */
         public static final class ActionState<S> {
             private final S initialState;
+            private S goalState;
 
             public ActionState(S initialState) {
                 this.initialState = initialState;
+                this.goalState = null;
+            }
+            
+            public ActionState<S> goalState(S goalState) {
+            	this.goalState = goalState;
+            	return this;
             }
 
             /**
@@ -221,6 +229,25 @@ public final class ProblemBuilder {
                         NodeExpander<A,S,WeightedNode<A,S,C>> expander = new LazyNodeExpander<A, S, WeightedNode<A, S, C>>(tf, factory);
                         // Create the algorithm with all those components
                         return new SearchProblem<A,S,WeightedNode<A,S,C>>(initialNode, expander);
+                    }
+                    
+                    public SearchProblem<A, S, WeightedNode<A, S, C>> buildBidirectional() {
+                        WeightedNodeFactory<A,S,C> factory = new WeightedNodeFactory<A,S,C>(
+                                cf,
+                                new HeuristicFunction<S, C>() {
+                                    @Override
+                                    public C estimate(S state) {
+                                        return costAlgebra.getIdentityElem();
+                                    }
+                                }, costAlgebra);
+                        // Make the initial node. The initial node contains the initial state
+                        // of the problem, and it comes from no previous node (null) and using no action (null)
+                        WeightedNode<A,S,C> initialNode = factory.makeNode(null, Transition.<A,S>create(null, null, initialState));
+                        WeightedNode<A,S,C> goalNode = factory.makeNode(null, Transition.<A,S>create(null, null, goalState));
+                        // Create a Lazy Node Expander by default
+                        NodeExpander<A,S,WeightedNode<A,S,C>> expander = new LazyNodeExpander<A, S, WeightedNode<A, S, C>>(tf, factory);
+                        // Create the algorithm with all those components
+                        return new SearchProblem<A,S,WeightedNode<A,S,C>>(initialNode, goalNode, expander);
                     }
 
                     public Heuristic useHeuristicFunction(HeuristicFunction<S, C> hf){
